@@ -1,0 +1,25 @@
+name: QuickCart tests and demo safety
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run unit and authorization tests
+        run: python -m pytest -q -m "not original_dataset"
+      - name: Compile Python modules
+        run: python -m compileall -q .
+      - name: Build and inspect synthetic-only demo
+        run: |
+          python -m scripts.build_public_demo --output /tmp/quickcart-public-demo
+          python -m scripts.check_demo_safety /tmp/quickcart-public-demo

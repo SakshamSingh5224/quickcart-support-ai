@@ -1,3 +1,4 @@
+import pytest
 """Regression test against the provided cleaned Part 1 dataset."""
 import csv
 from pathlib import Path
@@ -7,6 +8,7 @@ from policy_engine import decide
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.original_dataset
 def test_known_replacement_plus_refund_from_dataset():
     with (ROOT / 'data' / 'orders_clean.csv').open(newline='', encoding='utf-8') as handle:
         order = next(r for r in csv.DictReader(handle) if r['order_id'] == 'ORD-700002')

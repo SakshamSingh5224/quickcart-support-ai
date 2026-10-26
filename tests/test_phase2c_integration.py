@@ -1,3 +1,4 @@
+import pytest
 """Real cleaned-dataset integration smoke test for Phase 2C."""
 from pathlib import Path
 import uuid
@@ -9,6 +10,7 @@ from ticket_store import init_db, create_request, list_requests, update_request_
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.original_dataset
 def test_historical_conflict_yields_persisted_review_request(tmp_path):
     orders = pd.read_csv(ROOT / 'data' / 'orders_clean.csv')
     tickets = pd.read_csv(ROOT / 'data' / 'support_tickets_clean.csv')

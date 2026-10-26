@@ -1,3 +1,4 @@
+import pytest
 """Phase 2D: analytics metrics, denominator rules, missing data and SQLite live counts."""
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -227,6 +228,7 @@ def test_sqlite_counts_all_not_just_first_200(tmp_path):
     assert sqlite_overview(db)['active']==226
 
 
+@pytest.mark.original_dataset
 def test_dataset_phase1_reconciliation():
     """Reproduce original Part 1 count and refund-leak findings on supplied snapshot."""
     root = Path(__file__).resolve().parents[1] / 'data'

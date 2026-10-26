@@ -36,11 +36,12 @@ def chart_table(data, x, y, chart='bar', *, label=None):
         st.bar_chart(clean, use_container_width=True, horizontal=False)
 
 
-def render_admin_dashboard(orders: pd.DataFrame, tickets: pd.DataFrame, db_path):
+def render_admin_dashboard(orders: pd.DataFrame, tickets: pd.DataFrame, db_path, user=None):
+    from access_control import authorize_analytics
+    authorize_analytics(user)
     st.title('📊 QuickCart Operations Dashboard')
     st.caption('Phase 2D · Historical CSV operations metrics + separate live local SQLite request counts')
-    st.error('LOCAL DEMO — No authentication or authorization. Do not expose this analytics or agent '
-             'workspace publicly with customer data. Phase 2E will address access control.')
+    st.info('Admin-only reporting. Use synthetic or explicitly authorized customer data; this is not a production system.')
 
     o, t = prepare_data(orders, tickets)
     valid_dates = o['order_date'].dropna().dt.date

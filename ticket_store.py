@@ -1,7 +1,6 @@
 """Phase 2C: local SQLite persistence for DEMO support requests.
 
-No payment or courier operations. The agent console has NO AUTHENTICATION:
-use only with synthetic/authorized data on localhost.
+No payment or courier operations. Access checks are enforced through access_control.py.
 """
 from __future__ import annotations
 
@@ -137,11 +136,12 @@ def _validate_request(*, token, order_id, source_ticket_id, customer_question, t
 
 
 def create_request(db_path=DEFAULT_DB, *, token, order_id, source_ticket_id=None,
-                   customer_question, turn, audit):
+                   customer_question, turn, audit, actor="customer-demo"):
     """Insert one SUBMITTED request; repeat submissions with the same token are idempotent.
 
     A matching token cannot be reused with different payload. No external ticket is created.
     """
+    actor = _text(actor, "Request actor", 80)
     fields = _validate_request(token=token, order_id=order_id,
                                source_ticket_id=source_ticket_id,
                                customer_question=customer_question, turn=turn, audit=audit)
@@ -168,7 +168,7 @@ def create_request(db_path=DEFAULT_DB, *, token, order_id, source_ticket_id=None
         db.execute('''INSERT INTO request_events
                    (request_id,event_time_utc,previous_status,new_status,actor,note)
                    VALUES (?,?,?,?,?,?)''',
-                   (request_id, now, None, 'SUBMITTED', 'customer-demo', 'Local request submitted; no external action.'))
+                   (request_id, now, None, 'SUBMITTED', actor, 'Local request submitted; no external action.'))
         return dict(db.execute('SELECT * FROM support_requests WHERE request_id=?', (request_id,)).fetchone())
 
 
