@@ -52,3 +52,20 @@ See `part1/README_Part1.md` for cleaning notes and analytic findings. The origin
 ## GitHub
 
 See the setup steps in the companion chat answer. Never push `.venv/`, secrets, or real private customer information to a public repository. These assignment CSVs should only be committed if you are authorized to publish them.
+
+## Phase 2A — validation and safety hardening (October 2026)
+
+- Fixed Streamlit form/session-state collision by using `lookup_form` for the form and `lookup` for stored query state.
+- Added `policy_audit.py` to check historical records against SOP Rules 1–4, including optional damaged-item partial-refund anomalies, missing values, and combined order-level cash refunds.
+- Audits **all tickets for the order**, not only the displayed latest ticket; flags possible duplicates/overpayment for **human reconciliation**, not automatic chargebacks.
+- When any historical refund or replacement is recorded (or data is incomplete), new refund/replacement guidance is suppressed and a human review draft is offered. Historical records do not prove actual settlement.
+- Added unit and dataset regression tests; run `python -m pytest -q`.
+- Scope: no actual payment integration, login, support API, or generative AI. The app is still a local-only demo.
+
+### Manual acceptance checks
+
+1. Start Streamlit and submit `ORD-700002` with `My item came broken`; you should see a historical Rule 2 flag and the **Existing support history** decision, not a new ₹799 eligibility offer.
+2. Submit `TKT-900002` with `refund`; it should retrieve the same order and warnings.
+3. Submit an invalid ID (`ORD-ABC`), then an unknown numeric ID; each should show a clear error/warning.
+4. Click the draft action and download the JSON; verify `status` remains `DRAFT_NOT_SUBMITTED` and `requires_historical_reconciliation` is true for the example.
+5. Confirm no widget/session-state exception occurs after repeated form submissions.

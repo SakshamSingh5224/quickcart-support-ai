@@ -2,6 +2,8 @@
 import re
 from dataclasses import dataclass
 from typing import Optional
+from math import isfinite
+from policy_audit import audit_order
 
 @dataclass(frozen=True)
 class Decision:
@@ -27,7 +29,7 @@ def classify_question(question: str) -> str:
     return 'general'
 
 
-def decide(order: dict, question: str, ticket: Optional[dict] = None) -> Decision:
+def decide(order: dict, question: str, ticket: Optional[dict] = None, all_tickets: Optional[list[dict]] = None) -> Decision:
     """Informational eligibility guidance based on the four written SOP rules.
 
     This function cannot trigger a financial refund, replacement, voucher, or courier update.
@@ -37,11 +39,21 @@ def decide(order: dict, question: str, ticket: Optional[dict] = None) -> Decisio
     raw = order.get('order_amount')
     try:
         amount = float(raw)
-        if amount <= 0 or amount != amount:
+        if not isfinite(amount) or amount <= 0:
             amount = None
     except (ValueError, TypeError):
         amount = None
     intent = classify_question(question)
+    # Historical records are not proof of settled payments. Pause any new
+    # refund/replacement recommendation until an agent reconciles them.
+    history = all_tickets if all_tickets is not None else ([ticket] if ticket else [])
+    history_audit = audit_order(order, history)
+    if history_audit['requires_reconciliation']:
+        return Decision(intent, 'Existing support history — agent review required',
+                        f"This order has ₹{history_audit['recorded_refunds_inr']:,.2f} in recorded historical cash refunds"
+                        + (' and a recorded replacement.' if history_audit['replacement_recorded'] else '.')
+                        + ' These records must be verified before any additional refund or replacement is considered.',
+                        'Request historical resolution review', manual_review=True)
     if amount is None:
         return Decision(intent, 'Manual review required',
                         'The order amount is missing or invalid. We cannot calculate a safe refund amount.',

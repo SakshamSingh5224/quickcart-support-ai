@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 from policy_engine import decide
+from policy_audit import audit_order
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
@@ -75,16 +76,20 @@ if matched_ticket:
     st.write('**Latest / matched ticket:**', matched_ticket['ticket_id'], '—', matched_ticket['resolution_status'])
     st.caption('Historical recorded cash refund: ₹{:,.2f}. This is dataset history, not a payment issued by this app.'.format(float(matched_ticket.get('refund_amount', 0) or 0)))
 
-response = decide(order, question, matched_ticket)
+history = order_tickets.to_dict('records')
+audit = audit_order(order, history)
+response = decide(order, question, matched_ticket, history)
 st.subheader('Support assistant')
 st.success('**' + response.headline + '**')
 st.write(response.explanation)
 st.caption('Refund and voucher figures indicate SOP eligibility, not confirmed payment. Late vouchers are discretionary. Refunds must never exceed order value + ₹100 (Rule 4).')
 
-if matched_ticket and matched_ticket.get('resolution_status') == 'Resolved - Replacement Sent' and float(matched_ticket.get('refund_amount') or 0) > 0:
-    st.warning('Historical policy flag: this ticket records both a replacement and cash refund, contrary to Rule 2. It needs review, not another automatic refund.')
-if matched_ticket and pd.notna(order['order_amount']) and float(matched_ticket.get('refund_amount') or 0) > float(order['order_amount']) + 100.01:
-    st.warning('Historical policy flag: the recorded refund exceeds the Rule 4 limit.')
+if audit['flags']:
+    st.warning('Historical policy / data review flags (these are recorded data, not new payments):')
+    for ticket_id, flag in audit['flags']:
+        st.write(f'- **{ticket_id} / {flag.rule}:** {flag.explanation}')
+if audit['requires_reconciliation']:
+    st.info('New financial actions are blocked in this demo until an authorized agent reconciles the historical record.')
 
 st.subheader('Instant next step')
 st.write('Generate a structured request for the support team:')
@@ -98,7 +103,9 @@ if st.button(response.action, type='primary'):
         'action_requested': response.action,
         'policy_recommended_cash_refund_inr': response.eligible_refund,
         'policy_recommended_voucher_inr': response.voucher,
-        'requires_human_review': response.manual_review,
+        'requires_human_review': response.manual_review or audit['requires_reconciliation'],
+        'historical_recorded_refunds_inr': audit['recorded_refunds_inr'],
+        'requires_historical_reconciliation': audit['requires_reconciliation'],
         'status': 'DRAFT_NOT_SUBMITTED',
         'notice': 'Prototype draft only. No refund, replacement, voucher or ticket was created in an external system.'
     }

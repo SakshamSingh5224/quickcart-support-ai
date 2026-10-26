@@ -26,11 +26,11 @@ def test_unknown_amount_manual():
     assert decide(order('LOST_IN_TRANSIT',float('nan')),'refund').manual_review
 
 def test_resolved_late_bonus_discretionary():
-    d=decide(order('LOST_IN_TRANSIT'),'refund',{'is_open':False,'resolution_hours':26})
+    d=decide(order('LOST_IN_TRANSIT'),'refund',{'is_open':False,'resolution_hours':26,'refund_amount':0})
     assert d.voucher == 100 and d.eligible_refund == 1200
 
 def test_open_ticket_no_late_bonus():
-    d=decide(order('LOST_IN_TRANSIT'),'refund',{'is_open':True,'resolution_hours':40})
+    d=decide(order('LOST_IN_TRANSIT'),'refund',{'is_open':True,'resolution_hours':40,'refund_amount':0})
     assert d.voucher == 0
 
 def test_intent():
