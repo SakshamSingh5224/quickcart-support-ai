@@ -69,3 +69,7 @@ See the setup steps in the companion chat answer. Never push `.venv/`, secrets, 
 3. Submit an invalid ID (`ORD-ABC`), then an unknown numeric ID; each should show a clear error/warning.
 4. Click the draft action and download the JSON; verify `status` remains `DRAFT_NOT_SUBMITTED` and `requires_historical_reconciliation` is true for the example.
 5. Confirm no widget/session-state exception occurs after repeated form submissions.
+
+## Phase 2B — Conversational assistant
+
+The Streamlit app now uses a threaded chat interface with follow-up intent memory. See [PHASE_2B_NOTES.md](PHASE_2B_NOTES.md) for design, testing, and optional free offline Ollama explanations. Monetary recommendations **always** come from the deterministic SOP policy engine, never the LLM. Ollama is not required to run the app.
