@@ -11,6 +11,44 @@ public deployment kit (2E).
 
 ## Project architecture
 
+## Live Application
+
+🌐 **[Launch QuickCart Main Project](https://quickcart-main-project.streamlit.app/)**
+
+## Application Screenshots
+
+### 1. Customer Order Lookup
+Authenticated customers can check delivery details and historical support tickets.
+
+![Customer Order Lookup](docs/screenshots/customer-order.png)
+
+### 2. Customer Support Chatbot
+Policy-aware conversational assistance with historical refund validation.
+
+![QuickCart Support Chatbot](docs/screenshots/chatbot-policy.png)
+
+### 3. Support Request Submission
+Customers can submit requests that are stored in SQLite.
+
+![Support Request](docs/screenshots/support-request.png)
+
+### 4. Support Agent Workflow
+Agents can review requests, update statuses, and inspect audit history.
+
+![Agent Queue](docs/screenshots/agent-queue.png)
+
+### 5. Admin Analytics Dashboard
+Operational insights across orders, delivery performance, support SLA and CSAT.
+
+![Admin Dashboard](docs/screenshots/admin-overview.png)
+
+### 6. Refund Policy Audit
+Historical policy exception detection and estimated refund leakage analysis.
+
+![Refund Policy Audit](docs/screenshots/refund-audit.png)
+
+---
+
 ```text
 Streamlit UI (app.py)
   ├─ Local account login (auth_store.py)
