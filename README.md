@@ -1,8 +1,8 @@
 # QuickCart — Analytics + Policy-Aware Customer Support (Parts 1 and 2)
 
-A local, zero-API-cost Streamlit support prototype for the QuickCart analytics and AI case study. Built on **6,245 cleaned orders and 5,200 cleaned support tickets**, plus the four SOP refund rules. It provides an order/ticket ID lookup, question intent detection, status explanations, SOP-based refund guidance, historical-policy warnings, and **persisted local demo support requests with an agent review queue**.
+A local, zero-API-cost Streamlit support prototype for the QuickCart analytics and AI case study. Built on **6,245 cleaned orders and 5,200 cleaned support tickets**, plus the four SOP refund rules. It provides an order/ticket ID lookup, question intent detection, status explanations, SOP-based refund guidance, historical-policy warnings, and **persisted local demo support requests, an agent review queue, and an admin operations analytics dashboard**.
 
-**Important:** This is a **demo**, not a deployed payment or customer-support backend. It does not issue actual refunds/vouchers, update delivery tracking, or create an external ticket. Phase 2C stores new local demo requests in SQLite (not a hosted support platform). Order IDs are not authentication. Do not deploy actual customer data publicly.
+**Important:** This is a **demo**, not a deployed payment or customer-support backend. It does not issue actual refunds/vouchers, update delivery tracking, or create an external ticket. Phase 2C/2D stores new local demo requests in SQLite (not a hosted support platform). Order IDs are not authentication. Do not deploy actual customer data publicly.
 
 ## Run on Ubuntu
 
@@ -25,6 +25,7 @@ Test: `python -m pytest -q`
 3. Applies Rule 1 (lost/returned full refund; delayed transit ₹100 voucher and 48-hour wait; optional >24h resolution voucher); Rule 2 (replacement **or** full refund); Rule 3 (cancelled-before-ship unpaid COD refund ₹0); Rule 4 (maximum order amount + ₹100).
 4. Displays current stored delivery/ticket status and warns when applicable historical refunds conflict with rules.
 5. Creates and persists a local **support request** in SQLite, records status transitions, and can download a JSON receipt. No refund is executed.
+6. Offers **Admin analytics**: courier delivery/SLA/CSAT comparisons, refund anomaly trends, and separate aggregate local SQLite request activity.
 
 Responses use deterministic, auditable policy logic rather than a generative API. No sensitive customer messages are sent to external services.
 
@@ -33,6 +34,8 @@ Responses use deterministic, auditable policy logic rather than a generative API
 - `app.py`: Streamlit user interface / CSV lookup
 - `policy_engine.py`: rule-based support assistant
 - `ticket_store.py`: local SQLite request and audit-event storage
+- `analytics.py`: auditable pandas aggregates and SQLite summaries (no Streamlit dependency)
+- `dashboard_ui.py`: five-tab Streamlit admin operations dashboard
 - `tests/`: automated policy, conversation, and SQLite workflow tests
 - `data/`: cleaned Part 1 source data
 - `part1/`: Part 1 report, scripts, charts, cleaning log and policy document
@@ -42,7 +45,7 @@ Responses use deterministic, auditable policy logic rather than a generative API
 
 - Cleaned data is a historical snapshot, not real-time shipping status.
 - Actual refunds/replacements/vouchers require payment and courier APIs, authorization, audit records and idempotency.
-- For production, add customer login or OTP + order ownership verification, access control, server-side rate limiting, secure database, and PII handling. **Agent queue is currently unauthenticated.**
+- For production, add customer login or OTP + order ownership verification, access control, server-side rate limiting, secure database, and PII handling. **Agent queue and Admin analytics are currently unauthenticated.**
 - Damage cases require evidence and an agent's selection of either refund or replacement.
 - Refund amounts shown are SOP guidance; don't interpret them as already paid.
 - Some historical tickets already violate SOP, so don't use historical outcomes as correct policy examples.
@@ -81,3 +84,12 @@ The Streamlit app now uses a threaded chat interface with follow-up intent memor
 The app adds an SQLite-backed request history, an idempotent submission button, an unauthenticated **local demo** agent review queue, status transitions, and an auditable history. `FOLLOW_UP_APPROVED` denotes administrative follow-up only; **no refund or replacement is ever executed**.
 
 For precise status paths, local installation, example walkthrough, privacy considerations and GitHub commands, see [PHASE_2C_NOTES.md](PHASE_2C_NOTES.md). The SQLite file (`instance/quickcart.sqlite3`) is created automatically and excluded from Git.
+
+
+## Phase 2D — admin analytics (October 2026)
+
+Choose **Admin analytics** from the app sidebar for five tabs covering the historical snapshot and live SQLite support-request counts. The dashboard uses local Streamlit charts (no paid APIs).
+
+Historical filters use order placement date (inclusive), courier, category, and ticket channel. The delivery failure denominator is **shipped orders** (not all orders), average resolution excludes open tickets, and CSAT excludes invalid/unrated responses. Estimated refund leakage repeats the original Part 1 four-rule audit and does not mean actual settled financial loss. SQLite request metrics are from a different, unfiltered population and do not count toward historical tickets.
+
+Run `python -m pytest -q` and read `PHASE_2D_NOTES.md` for test cases, metric formulas and manual validation steps. **Run on localhost only until Phase 2E authorization and privacy controls are implemented.**

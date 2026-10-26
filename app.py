@@ -1,4 +1,4 @@
-"""QuickCart Phase 2C: local customer chat + persistent support-ticket workflow.
+"""QuickCart Phase 2D: local customer chat, ticket workflow and admin analytics.
 
 WARNING: neither the customer screen nor the demo agent console authenticates people.
 Keep this app on localhost with approved/synthetic CSVs; no payment integrations exist.
@@ -19,7 +19,7 @@ from ticket_store import (
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
-st.set_page_config(page_title='QuickCart | Order Help', page_icon='📦', layout='centered')
+st.set_page_config(page_title='QuickCart | Order Help', page_icon='📦', layout='wide')
 
 
 @st.cache_data
@@ -38,19 +38,24 @@ def prepare_database():
 prepare_database()
 orders, tickets = load_data()
 st.title('📦 QuickCart Order Help')
-st.caption('Phase 2C · Conversational policy support · SQLite ticket tracking · Local agent review')
+st.caption('Phase 2D · Conversational support · SQLite tickets · Aggregated operations analytics')
 st.warning('LOCAL DEMO ONLY — No identity verification or role authorization. Do not deploy with real customer data. '
            'No refunds, replacements, vouchers, courier changes, or external support tickets are executed.')
 
 with st.sidebar:
-    workspace = st.radio('Workspace (demo only)', ['Customer help', 'Agent queue'], index=0,
-                         help='Switching to Agent queue does not authenticate a reviewer.')
+    workspace = st.radio('Workspace (demo only)', ['Customer help', 'Agent queue', 'Admin analytics'], index=0,
+                         help='These workspaces do not authenticate any customer, reviewer or admin.')
     st.divider()
     use_llm = st.toggle('Optional local Ollama explanations', value=False, disabled=workspace != 'Customer help',
                         help='Localhost-only, supplemental wording; not used to make refund decisions.')
     model = st.text_input('Installed Ollama model', value='qwen2.5:0.5b',
                           disabled=not use_llm or workspace != 'Customer help')
-    st.caption('Data: cleaned CSV snapshot. New demo requests: instance/quickcart.sqlite3 (not committed to Git).')
+    st.caption('Historical CSV snapshots + new SQLite demo requests in instance/ (Git-ignored).')
+
+if workspace == 'Admin analytics':
+    from dashboard_ui import render_admin_dashboard
+    render_admin_dashboard(orders, tickets, DEFAULT_DB)
+    st.stop()
 
 if workspace == 'Agent queue':
     st.subheader('Local support review queue')
