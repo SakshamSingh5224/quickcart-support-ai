@@ -1,0 +1,5 @@
+courier_partner,orders,lost_delayed,lost_delayed_rate_pct_all,lost_delayed_rate_pct_shipped,lost_pct,delayed_pct,avg_resolution_hrs,median_resolution_hrs,tickets,open_tickets,avg_csat
+BlueDart_Air,1139,207,18.17,20.58,9.75,8.43,19.08,16.02,891,119,3.95
+Delhivery_Express,1439,261,18.14,20.52,9.45,8.69,18.94,15.5,1142,117,3.91
+EcomExpress_Surface,1299,245,18.86,21.91,9.62,9.24,19.15,16.05,1072,121,3.86
+Shadowfax_Local,2368,728,30.74,34.03,16.47,14.27,32.43,26.52,2095,225,3.41

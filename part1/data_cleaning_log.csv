@@ -1,0 +1,17 @@
+file,issue,fix,rows_affected
+orders,"Order dates in 6+ different formats (ISO, dd-Mon-yy, ""January 23, 2026 11:41 AM"", dd.mm.yyyy, ...)","Parsed all to a single datetime (numeric dates treated as day-first, confirmed by duplicate pairs)",6500
+orders,"Leading/trailing whitespace in city, category, courier (cell count)",strip(),1506
+orders,"City spelling/case variants (Bangalore/Bengaluru, mumbai , New Delhi/Delhi NCR)",Mapped to 6 canonical cities (New Delhi merged into Delhi NCR),1084
+orders,product_category inconsistent case/underscore/spacing (12 variants),Mapped to 4 canonical categories,649
+orders,courier_partner lowercase / trailing spaces (8 variants),Mapped to 4 canonical couriers,813
+orders,"order_amount stored as text with ""₹"", ""INR"", commas, "".00""",Stripped symbols and converted to float,1204
+orders,Invalid sentinel order_amount (-999),"Set to NaN (not a real price); a duplicate row with a valid amount is used if one exists, otherwise the order stays in counts but is excluded from GMV",45
+orders,"Duplicate order rows (same order_id repeated, often with date in a different format)",Dropped duplicates after standardising formats; kept one row per order_id,255
+tickets,"order_id in inconsistent formats (""701922"", "" ord_700007 "", trailing spaces)",Extracted digits and rebuilt as ORD-xxxxxx,651
+tickets,Created/resolved timestamps in 6+ formats,Parsed to standard datetime,5550
+tickets,"refund_amount as text (""Rs. 1099"", ""₹1,099.00"", ""NIL"", blank)",Stripped currency text; NIL/blank -> 0,1796
+tickets,"Invalid CSAT sentinels (99, -1)",Set to NaN (excluded from average),31
+tickets,Blank CSAT (customer did not rate; includes all open tickets),"Left as NaN, not treated as 0",2342
+tickets,"Duplicate ticket rows (same ticket_id, timestamps in different formats)",Dropped duplicates; kept one row per ticket_id,350
+tickets,Resolved timestamp earlier than created timestamp,Assumed swapped entry; swapped the two timestamps,38
+tickets,Orphan tickets (order_id not in orders.csv) AFTER ID normalisation,None found - every ticket maps to an order once IDs are standardised (444 looked orphaned before the fix),0
